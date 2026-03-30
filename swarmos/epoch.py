@@ -426,6 +426,19 @@ def run_epoch(job_id: str, resume: bool = False):
     progress = EpochProgress(job_id=job_id, domain=domain, pair_count=poj.pair_count)
     state.save_progress(job_id, progress)
 
+    # Launch gate monitor — auto-fires email reports at 5/25/50/75%
+    gate_monitor = None
+    gate_script = Path(__file__).parent.parent / "templates" / "gate_monitor.sh"
+    if gate_script.exists():
+        gate_monitor = subprocess.Popen(
+            ["bash", str(gate_script), job_id, domain, str(poj.pair_count)],
+            stdout=open(output_dir / "gate_monitor.log", "w"),
+            stderr=subprocess.STDOUT,
+        )
+        log.info("Gate monitor launched (PID %d) — auto emails at 5%%/25%%/50%%/75%%", gate_monitor.pid)
+    else:
+        log.warning("Gate monitor not found at %s — manual gate checks required", gate_script)
+
     # Run judge phase (blocking — fills the bin)
     log.info("=== JUDGE PHASE ===")
     judge_stats = asyncio.run(run_judge_phase(pairs, domain, judge_ports, bin_file, start_idx=skip))
@@ -448,6 +461,12 @@ def run_epoch(job_id: str, resume: bool = False):
     progress.recorder_rate = record_stats["rate"]
     progress.elapsed_sec = judge_stats["wall_sec"] + record_stats["wall_sec"]
     state.save_progress(job_id, progress)
+
+    # Stop gate monitor
+    if gate_monitor and gate_monitor.poll() is None:
+        gate_monitor.terminate()
+        gate_monitor.wait(timeout=5)
+        log.info("Gate monitor stopped")
 
     log.info("═══ EPOCH COMPLETE — %d deeds | H:%d RJ:%d P:%d ═══",
              progress.recorded, progress.honey, progress.royal_jelly, progress.propolis)
