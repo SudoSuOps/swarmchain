@@ -1,0 +1,26 @@
+<div style="font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; padding: 40px; max-width: 600px; margin: 0 auto;">
+  <div style="border-bottom: 1px solid #222; padding-bottom: 12px; margin-bottom: 20px;">
+    <span style="color: #f0b000; font-size: 14px; letter-spacing: 4px;">SWARMCHAIN</span>
+    <span style="color: ${GATE_COLOR}; font-size: 14px; letter-spacing: 4px;"> ${GATE_TYPE} &mdash; ${GATE_PCT}%</span>
+  </div>
+  <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+    <div style="color: #f0b000; font-size: 36px; letter-spacing: 4px;">${PROGRESS_PCT}%</div>
+    <div style="background: #222; height: 8px; border-radius: 4px; margin: 12px 0; overflow: hidden;">
+      <div style="background: #f0b000; height: 100%; width: ${PROGRESS_PCT}%; border-radius: 4px;"></div>
+    </div>
+    <div style="color: #555; font-size: 12px;">${JUDGED} / ${TOTAL_PAIRS} pairs judged</div>
+  </div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px;">
+    <tr><td style="color:#555;padding:6px 0;">Job</td><td style="text-align:right;">${JOB_ID}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Domain</td><td style="text-align:right;">${DOMAIN}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Avg Score</td><td style="text-align:right;">${AVG_SCORE}</td></tr>
+    <tr><td style="color:#f0b000;padding:8px 0;">Royal Jelly</td><td style="text-align:right;color:#f0b000;font-size:16px;">${RJ_COUNT} (${RJ_RATE}%)</td></tr>
+    <tr><td style="color:#d4940a;padding:6px 0;">Honey</td><td style="text-align:right;">${HONEY_COUNT}</td></tr>
+    <tr><td style="color:#f04040;padding:6px 0;">Propolis</td><td style="text-align:right;">${PROPOLIS_COUNT}</td></tr>
+    <tr style="border-top:1px solid #222;"><td style="color:#555;padding:8px 0;">Empty Verdicts</td><td style="text-align:right;color:#4caf50;">${EMPTY_COUNT} ${CLEAN_STATUS}</td></tr>
+  </table>
+  <div style="color:#555; font-size:11px; line-height:1.7;">${FOOTER_NOTE}</div>
+  <div style="border-top:1px solid #222; padding-top:12px; text-align:center; color:#555; font-size:10px; letter-spacing:2px; margin-top:16px;">
+    DEFENDABLE AI INTELLIGENCE REFINERY &mdash; <span style="color:#f0b000;">SWARM &amp; BEE</span>
+  </div>
+</div>
