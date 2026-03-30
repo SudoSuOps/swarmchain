@@ -72,6 +72,6 @@ register(AlgoConfig(
     name="benchmark-arc",
     domain="arc",
     description="ARC procedural task benchmark (deterministic scoring)",
-    honey_threshold=0.95,
-    jelly_threshold=0.30,
+    royal_jelly_threshold=0.95,
+    honey_threshold=0.30,
 ))
