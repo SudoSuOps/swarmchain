@@ -29,19 +29,27 @@ API_KEY = _env("SWARM_API_KEY", "") or _env(
     "354131b4c036349ae89ebd0a2d73be7cfe665eb1d2b642cc62dd4262e54ce953",
 )
 
-# ── Fee Schedule (configurable per tier) ───────────────────
+# ── Fee Schedule — Title Company Model ─────────────────────
+#
+# We don't sell compute time. We sell title insurance on intelligence assets.
+# Clients see the fee schedule, not our cost basis.
+# Two-cook standard: Cook 1 (discovery) + Cook 2 (validation) disclosed.
+#
+# Title premium = per-deed fee (like title insurance per property)
+# Fixed fees = per-job overhead (like doc prep, recording, inspection)
 
-# Title premium tiers (per deed)
-FEE_TIER_FLOOR = float(_env("FEE_TIER_FLOOR", "0.008"))       # 10× CTM
-FEE_TIER_STANDARD = float(_env("FEE_TIER_STANDARD", "0.02"))  # 25× CTM
-FEE_TIER_FULL = float(_env("FEE_TIER_FULL", "0.05"))          # 62× CTM — Full Title + Hedera
-FEE_TIER_ENTERPRISE = float(_env("FEE_TIER_ENTERPRISE", "0.10"))  # 125× CTM
+# Title premium tiers (per deed) — 10× cost basis minimum
+FEE_TIER_FLOOR = float(_env("FEE_TIER_FLOOR", "0.005"))        # Volume — 10,000+ pairs
+FEE_TIER_STANDARD = float(_env("FEE_TIER_STANDARD", "0.01"))   # Standard — 1,000-10,000 pairs
+FEE_TIER_FULL = float(_env("FEE_TIER_FULL", "0.025"))          # Full Title + Hedera anchor
+FEE_TIER_ENTERPRISE = float(_env("FEE_TIER_ENTERPRISE", "0.05"))  # Enterprise — SLA + dedicated rig
 
-# Fixed fees (per epoch / job)
-FEE_DOC_PREP = float(_env("FEE_DOC_PREP", "50.0"))
-FEE_FLIGHT_SHEET = float(_env("FEE_FLIGHT_SHEET", "100.0"))
-FEE_RECORDING = float(_env("FEE_RECORDING", "25.0"))
-FEE_INSPECTION = float(_env("FEE_INSPECTION", "25.0"))
+# Fixed fees (per job — covers both Cook 1 and Cook 2)
+FEE_MODEL_PREP = float(_env("FEE_MODEL_PREP", "250.0"))        # Model preparation + calibration
+FEE_DOC_PREP = float(_env("FEE_DOC_PREP", "75.0"))             # Flight sheet + permit + addendums
+FEE_FLIGHT_SHEET = float(_env("FEE_FLIGHT_SHEET", "150.0"))    # Hardware profiling + assignment
+FEE_RECORDING = float(_env("FEE_RECORDING", "50.0"))           # Chain recording + Hedera anchor
+FEE_INSPECTION = float(_env("FEE_INSPECTION", "75.0"))         # 4-gate inspection + gate reports
 
 # ── Cost Inputs ────────────────────────────────────────────
 

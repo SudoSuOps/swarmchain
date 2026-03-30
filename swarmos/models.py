@@ -175,16 +175,23 @@ class CalibrationReport(BaseModel):
 
 
 class FeeSchedule(BaseModel):
-    title_premium_per_deed: float = 0.05    # $/deed (Full Title + Hedera tier)
-    doc_prep_fee: float = 50.0
-    flight_sheet_setup: float = 100.0
-    recording_fee: float = 25.0
-    inspection_report: float = 25.0
+    """Client-facing fee schedule — title company model.
+
+    Clients see the fees, not our cost basis.
+    Two-cook standard included: Cook 1 (discovery) + Cook 2 (validation).
+    """
+    title_premium_per_deed: float = 0.025   # $/deed — Full Title + Hedera
+    model_prep_fee: float = 250.0           # Model preparation + calibration
+    doc_prep_fee: float = 75.0              # Flight sheet + permit + addendums
+    flight_sheet_setup: float = 150.0       # Hardware profiling + assignment
+    recording_fee: float = 50.0             # Chain recording + Hedera anchor
+    inspection_report: float = 75.0         # 4-gate inspection + gate reports
+    cooks_included: int = 2                 # Two-cook standard (discovery + validation)
 
     @computed_field
     @property
     def fixed_fees_total(self) -> float:
-        return self.doc_prep_fee + self.flight_sheet_setup + self.recording_fee + self.inspection_report
+        return self.model_prep_fee + self.doc_prep_fee + self.flight_sheet_setup + self.recording_fee + self.inspection_report
 
 
 class EstimatedCost(BaseModel):
