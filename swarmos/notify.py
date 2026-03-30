@@ -54,7 +54,7 @@ def notify_gate(gate_report: dict, domain: str, job_id: str = "") -> bool:
     pct = g * 25
 
     # Determine status color
-    if c["wax_pct"] > 70:
+    if c["propolis_pct"] > 70:
         status = "WARNING"
         status_color = "danger"
     elif c["royal_jelly_pct"] > 50:
@@ -85,11 +85,11 @@ def notify_gate(gate_report: dict, domain: str, job_id: str = "") -> bool:
         <table>
             <tr><td>Royal Jelly</td><td class="{status_color}">{c['royal_jelly']} ({c['royal_jelly_pct']}%)</td></tr>
             <tr><td>Honey</td><td class="warn">{c['honey']} ({c['honey_pct']}%)</td></tr>
-            <tr><td>Wax</td><td>{c['wax']} ({c['wax_pct']}%)</td></tr>
+            <tr><td>Propolis</td><td>{c['propolis']} ({c['propolis_pct']}%)</td></tr>
         </table>
     </div>
 
-    {"<div class='section' style='border-color: #f04040;'><p class='danger'>WARNING: Wax rate " + str(c['wax_pct']) + "% — review judge settings before continuing</p></div>" if c['wax_pct'] > 70 else ""}
+    {"<div class='section' style='border-color: #f04040;'><p class='danger'>WARNING: Propolis rate " + str(c['propolis_pct']) + "% — review judge settings before continuing</p></div>" if c['propolis_pct'] > 70 else ""}
 
     <div class="section">
         <p>Gate {g} of {tg} complete. {'Final gate — ready for finality.' if g == tg else f'Next gate: {g+1}/{tg}'}</p>
@@ -133,7 +133,7 @@ def notify_epoch_complete(domain: str, stats: dict, wall_sec: float, job_id: str
         <table>
             <tr><td>Royal Jelly (≥0.75)</td><td class="ok">{rj:,} ({rj/max(total,1)*100:.1f}%)</td></tr>
             <tr><td>Honey (0.50-0.74)</td><td class="warn">{h:,} ({h/max(total,1)*100:.1f}%)</td></tr>
-            <tr><td>Wax (<0.50)</td><td>{w:,} ({w/max(total,1)*100:.1f}%)</td></tr>
+            <tr><td>Propolis (<0.50)</td><td>{w:,} ({w/max(total,1)*100:.1f}%)</td></tr>
         </table>
     </div>
 

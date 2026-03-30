@@ -55,7 +55,7 @@ class RefineryPipeline:
             "judged": judge_stats["judged"],
             "recorded": record_stats["recorded"],
             "honey": judge_stats["honey"],
-            "jelly": judge_stats["jelly"],
+            "royal_jelly": judge_stats["royal_jelly"],
             "propolis": judge_stats["propolis"],
             "judge_rate": judge_stats["rate"],
             "recorder_rate": record_stats["rate"],

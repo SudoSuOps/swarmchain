@@ -161,7 +161,7 @@ class CalibrationReport(BaseModel):
     # Measured quality
     sample_honey_rate: float = 0.0
     sample_honey: int = 0
-    sample_jelly: int = 0
+    sample_royal_jelly: int = 0
     sample_propolis: int = 0
     # Comparison to flight sheet estimates
     hashrate_variance_pct: float = 0.0
@@ -217,7 +217,7 @@ class POJ(BaseModel):
 
     # Deliverables
     deliverables: list[str] = Field(default_factory=lambda: [
-        "honey.jsonl", "jelly.jsonl", "propolis.jsonl",
+        "royal-jelly.jsonl", "honey.jsonl", "propolis.jsonl",
         "receipts.jsonl", "epoch_report.json", "closing.json",
     ])
     terms_version: str = "v1.0"
@@ -251,7 +251,7 @@ class EpochProgress(BaseModel):
     pending_in_bin: int = 0
     # Classification
     honey: int = 0
-    jelly: int = 0
+    royal_jelly: int = 0
     propolis: int = 0
     skipped: int = 0
     # Timing
@@ -311,7 +311,7 @@ class ClosingStatement(BaseModel):
     # Actuals — None means "not captured", distinct from 0
     actual_pairs_processed: int = 0
     actual_honey: int = 0
-    actual_jelly: int = 0
+    actual_royal_jelly: int = 0
     actual_propolis: int = 0
     actual_honey_rate: float = 0.0
     actual_wall_time_hours: Optional[float] = None

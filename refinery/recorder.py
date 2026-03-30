@@ -37,7 +37,7 @@ class Recorder:
         self.api_url = api_url
 
     async def run(self, bin_file: Path, output_dir: Path, existing: int = 0) -> dict:
-        stats = {"recorded": 0, "r_honey": 0, "r_jelly": 0, "r_propolis": 0}
+        stats = {"recorded": 0, "r_honey": 0, "r_royal_jelly": 0, "r_propolis": 0}
         work_q: asyncio.Queue = asyncio.Queue(maxsize=len(self.ports) * 2)
         write_lock = asyncio.Lock()
         start_time = time.monotonic()
@@ -113,8 +113,8 @@ class Recorder:
                 stats["recorded"] += 1
                 if c == "honey":
                     stats["r_honey"] += 1
-                elif c == "jelly":
-                    stats["r_jelly"] += 1
+                elif c == "royal-jelly":
+                    stats["r_royal_jelly"] += 1
                 else:
                     stats["r_propolis"] += 1
             q.task_done()

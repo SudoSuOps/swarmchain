@@ -295,7 +295,7 @@ def status(job_id: str | None):
             click.echo(f"  Judged:    {progress.judged}/{progress.pair_count}")
             click.echo(f"  Recorded:  {progress.recorded}/{progress.pair_count}")
             click.echo(f"  Pending:   {progress.pending_in_bin}")
-            click.echo(f"  Honey: {progress.honey} | Jelly: {progress.jelly} | Propolis: {progress.propolis}")
+            click.echo(f"  Honey: {progress.honey} | Royal Jelly: {progress.royal_jelly} | Propolis: {progress.propolis}")
             click.echo(f"  Rate:      {progress.recorder_rate:.1f} deeds/min")
             click.echo(f"  ETA:       {progress.eta_sec/3600:.1f}h")
         else:
