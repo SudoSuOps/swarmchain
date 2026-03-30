@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swarmchain"
+version = "0.1.0"
+description = "SwarmChain — Sovereign AI Validation & Deed Recording System"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+    "pydantic>=2.0",
+    "httpx>=0.24",
+]
+
+[project.optional-dependencies]
+backend = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "pydantic-settings>=2.0",
+    "alembic>=1.13",
+    "redis>=5.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.3",
+]
+
+[project.scripts]
+swarmos = "swarmos.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["swarmos*", "refinery*", "backend*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

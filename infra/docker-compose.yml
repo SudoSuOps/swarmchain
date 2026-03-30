@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: swarmchain
+      POSTGRES_PASSWORD: swarmchain
+      POSTGRES_DB: swarmchain
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U swarmchain"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  backend:
+    build: ../backend
+    ports:
+      - "8000:8000"
+    environment:
+      SWARMCHAIN_DATABASE_URL: postgresql+asyncpg://swarmchain:swarmchain@postgres:5432/swarmchain
+      SWARMCHAIN_DATABASE_URL_SYNC: postgresql://swarmchain:swarmchain@postgres:5432/swarmchain
+      SWARMCHAIN_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build: ../frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  simulator:
+    build: ../simulator
+    environment:
+      SWARMCHAIN_API_URL: http://backend:8000
+    depends_on:
+      - backend
+    profiles:
+      - simulate
+
+volumes:
+  pgdata:

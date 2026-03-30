@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 256mb
+    environment:
+      POSTGRES_USER: swarmchain
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: swarmchain
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - swarmchain-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U swarmchain"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - swarmchain-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ../backend
+    restart: always
+    env_file:
+      - .env.prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - swarmchain-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: uvicorn swarmchain.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+  frontend:
+    build: ../frontend
+    restart: always
+    networks:
+      - swarmchain-net
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.active.conf:/etc/nginx/nginx.conf:ro
+      - certbot_etc:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - swarmchain-net
+
+volumes:
+  pgdata:
+  redis_data:
+  certbot_etc:
+  certbot_www:
+
+networks:
+  swarmchain-net:
+    driver: bridge
