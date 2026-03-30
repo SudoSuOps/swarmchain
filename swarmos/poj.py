@@ -40,10 +40,12 @@ def generate_poj(
 
     fee_schedule = FeeSchedule(
         title_premium_per_deed=premium_rate,
+        model_prep_fee=config.FEE_MODEL_PREP,
         doc_prep_fee=config.FEE_DOC_PREP,
         flight_sheet_setup=config.FEE_FLIGHT_SHEET,
         recording_fee=config.FEE_RECORDING,
         inspection_report=config.FEE_INSPECTION,
+        cooks_included=2,
     )
 
     # Estimated title premium
@@ -102,17 +104,17 @@ def format_poj(poj: POJ) -> str:
         "",
         "  FEE SCHEDULE:",
         f"    Title premium:    {poj.pair_count:,} × ${poj.fee_schedule.title_premium_per_deed:.3f} = ${poj.estimated_title_premium:,.2f}",
-        f"    Doc prep fee:     ${poj.fee_schedule.doc_prep_fee:.2f}",
+        f"    Model prep:       ${poj.fee_schedule.model_prep_fee:.2f}",
+        f"    Doc prep:         ${poj.fee_schedule.doc_prep_fee:.2f}",
         f"    Flight sheet:     ${poj.fee_schedule.flight_sheet_setup:.2f}",
         f"    Recording fee:    ${poj.fee_schedule.recording_fee:.2f}",
         f"    Inspection:       ${poj.fee_schedule.inspection_report:.2f}",
         "    ─────────────────────────────────────",
         f"    ESTIMATED TOTAL:  ${poj.estimated_total_closing:,.2f}",
         "",
-        "  ESTIMATES:",
-        f"    Cost to produce:  ${poj.estimated_cost.total_production:.2f} (${poj.estimated_cost.per_deed:.6f}/deed)",
-        f"    Timeline:         {poj.estimated_timeline_hours:.1f} hours",
-        f"    Honey rate:       {poj.estimated_honey_rate:.1%}",
+        "  SCOPE:",
+        f"    Cooks included:   {poj.fee_schedule.cooks_included} (Cook 1: discovery · Cook 2: validation)",
+        f"    Timeline:         {poj.estimated_timeline_hours:.1f} hours per cook",
         f"    Hashrate:         {poj.estimated_hashrate:.1f} deeds/min",
         "",
         "  DELIVERABLES:",
