@@ -356,6 +356,7 @@ def calibrate(job_id: str, input_path: str, sample_size: int):
 def run_epoch_cmd(job_id: str, resume: bool):
     """Execute an epoch from a signed POJ (requires valid permit)."""
     import logging
+    from . import state
     from .epoch import run_epoch
     from .permit import verify_permit
 
