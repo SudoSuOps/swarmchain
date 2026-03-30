@@ -14,7 +14,79 @@ API = os.environ.get("SWARM_API_URL", "http://localhost:8080")
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get("SWARM_GLASSWALL_PORT", "3000"))
 JOBS_DIR = Path(os.environ.get("SWARM_JOBS_DIR", "/data2/swarmchain/jobs"))
+HONEY_DIR = Path(os.environ.get("HONEY_DIR", "/data1/swarm-honey"))
 RESEND_KEY = os.environ.get("RESEND_API_KEY", "***SECRET_PURGED_FROM_HISTORY***")
+
+
+def _cook_status():
+    """Read live cook status from files — no backend needed."""
+    # Find the active job (has POJ signed but no closing)
+    active = None
+    for d in sorted(JOBS_DIR.iterdir()):
+        if not d.is_dir(): continue
+        if (d / "poj.json").exists() and not (d / "closing.json").exists():
+            active = d
+    if not active:
+        return {"status": "idle", "cooking": False}
+
+    poj = json.loads((active / "poj.json").read_text())
+    domain = poj.get("domain", "")
+    job_id = active.name
+    validated = HONEY_DIR / domain / "validated"
+
+    def _count(f):
+        try: return sum(1 for _ in open(f))
+        except: return 0
+
+    judged = _count(validated / "judged.jsonl")
+    receipts = _count(validated / "receipts.jsonl")
+
+    # Read last 10 verdicts for live feed
+    rj = h = p = 0
+    scores = []
+    recent = []
+    judged_file = validated / "judged.jsonl"
+    if judged_file.exists():
+        lines = open(judged_file).readlines()
+        for line in lines:
+            try:
+                d = json.loads(line.strip())
+                s = d.get("score", 0)
+                c = d.get("classification", "")
+                if c == "royal-jelly": rj += 1
+                elif c == "honey": h += 1
+                else: p += 1
+                if s > 0: scores.append(s)
+            except: pass
+        for line in lines[-10:]:
+            try:
+                d = json.loads(line.strip())
+                recent.append({
+                    "score": d.get("score", 0),
+                    "classification": d.get("classification", ""),
+                    "judge_ms": d.get("judge_ms", 0),
+                    "domain": d.get("domain", ""),
+                })
+            except: pass
+
+    total = rj + h + p
+    return {
+        "status": "cooking" if judged < poj.get("pair_count", 0) and judged > 0 else "idle" if judged == 0 else "complete",
+        "cooking": judged > 0 and judged < poj.get("pair_count", 0),
+        "job_id": job_id,
+        "domain": domain,
+        "pair_count": poj.get("pair_count", 0),
+        "judged": judged,
+        "receipts": receipts,
+        "royal_jelly": rj,
+        "honey": h,
+        "propolis": p,
+        "avg_score": round(sum(scores) / len(scores), 3) if scores else 0,
+        "rj_rate": round(rj / max(total, 1) * 100, 1),
+        "progress_pct": round(judged / max(poj.get("pair_count", 1), 1) * 100, 1),
+        "recent": recent,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 def _approve_job(job_id, token):
@@ -131,6 +203,18 @@ class GlassWallHandler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', len(html))
             self.end_headers()
             self.wfile.write(html)
+            return
+
+        # ── Live cook status (file-based, no backend needed) ──
+        if path == '/api/cook-status':
+            data = json.dumps(_cook_status()).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('Content-Length', len(data))
+            self.end_headers()
+            self.wfile.write(data)
             return
 
         # ── API proxy ──
