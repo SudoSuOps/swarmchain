@@ -54,9 +54,9 @@ def _file_size(path: Path) -> int:
 
 def _build_manifest(output_dir: Path) -> list[DeliverableFile]:
     files = []
-    for name in ["honey.jsonl", "jelly.jsonl", "royal-jelly.jsonl",
-                  "propolis.jsonl", "wax.jsonl", "receipts.jsonl",
-                  "judged.jsonl", "epoch_report.json", "closing.json"]:
+    for name in ["royal-jelly.jsonl", "honey.jsonl", "propolis.jsonl",
+                  "jelly.jsonl", "wax.jsonl",  # backward compat
+                  "receipts.jsonl", "judged.jsonl", "epoch_report.json", "closing.json"]:
         p = output_dir / name
         if p.exists():
             files.append(DeliverableFile(
@@ -91,8 +91,8 @@ def _adopt_epoch(domain: str, output_dir: Path) -> EpochProgress:
     judged_count = _count_lines(output_dir / "judged.jsonl")
     receipt_count = _count_lines(output_dir / "receipts.jsonl")
     honey = _count_lines(output_dir / "honey.jsonl")
-    jelly = _count_lines(output_dir / "jelly.jsonl") + _count_lines(output_dir / "royal-jelly.jsonl")
-    propolis = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")
+    royal_jelly = _count_lines(output_dir / "royal-jelly.jsonl") + _count_lines(output_dir / "jelly.jsonl")  # backward compat
+    propolis = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")  # backward compat
 
     return EpochProgress(
         job_id="adopted",
@@ -106,7 +106,7 @@ def _adopt_epoch(domain: str, output_dir: Path) -> EpochProgress:
         recorder_rate=None,     # Not captured
         pending_in_bin=max(0, judged_count - receipt_count),
         honey=honey,
-        jelly=jelly,
+        royal_jelly=royal_jelly,
         propolis=propolis,
         elapsed_sec=None,       # Not captured
         eta_sec=None,
@@ -238,12 +238,12 @@ def generate_closing(job_id: str) -> ClosingStatement:
         epoch_source = "adopted"
 
     # ── Observed: classification counts from files ──
-    # Support both naming conventions: jelly/propolis AND royal-jelly/wax
+    # Canonical: royal-jelly/honey/propolis — also reads legacy jelly.jsonl and wax.jsonl
     honey_count = _count_lines(output_dir / "honey.jsonl")
-    jelly_count = _count_lines(output_dir / "jelly.jsonl") + _count_lines(output_dir / "royal-jelly.jsonl")
-    propolis_count = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")
+    royal_jelly_count = _count_lines(output_dir / "royal-jelly.jsonl") + _count_lines(output_dir / "jelly.jsonl")  # backward compat
+    propolis_count = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")  # backward compat
     receipt_count = _count_lines(output_dir / "receipts.jsonl")
-    total_processed = honey_count + jelly_count + propolis_count
+    total_processed = honey_count + royal_jelly_count + propolis_count
     actual_honey_rate = honey_count / max(total_processed, 1)
 
     # ── Runtime metrics — None if not captured ──
@@ -313,7 +313,7 @@ def generate_closing(job_id: str) -> ClosingStatement:
         epoch_source=epoch_source,
         actual_pairs_processed=total_processed,
         actual_honey=honey_count,
-        actual_jelly=jelly_count,
+        actual_royal_jelly=royal_jelly_count,
         actual_propolis=propolis_count,
         actual_honey_rate=round(actual_honey_rate, 4),
         actual_wall_time_hours=actual_wall_hours,
@@ -352,7 +352,7 @@ def format_closing(cs: ClosingStatement) -> str:
         "",
         f"  CLASSIFICATION RESULTS:                    [{cs.data_sources.classification}]",
         f"    Honey:    {cs.actual_honey:,}  ({cs.actual_honey_rate:.1%})",
-        f"    Jelly:    {cs.actual_jelly:,}",
+        f"    Royal Jelly: {cs.actual_royal_jelly:,}",
         f"    Propolis: {cs.actual_propolis:,}",
         f"    Total:    {cs.actual_pairs_processed:,}",
         "",

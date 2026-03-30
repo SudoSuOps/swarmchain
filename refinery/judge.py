@@ -41,7 +41,7 @@ class Judge:
         self.ports = ports
 
     async def run(self, pairs: list[dict], bin_file: Path, start_idx: int = 0) -> dict:
-        stats = {"judged": 0, "honey": 0, "jelly": 0, "propolis": 0, "skipped": 0}
+        stats = {"judged": 0, "honey": 0, "royal_jelly": 0, "propolis": 0, "skipped": 0}
         input_q: asyncio.Queue = asyncio.Queue(maxsize=100)
         write_lock = asyncio.Lock()
         start_time = time.monotonic()
@@ -97,8 +97,8 @@ class Judge:
                 stats["judged"] += 1
                 if classification == "honey":
                     stats["honey"] += 1
-                elif classification == "jelly":
-                    stats["jelly"] += 1
+                elif classification == "royal-jelly":
+                    stats["royal_jelly"] += 1
                 else:
                     stats["propolis"] += 1
             q.task_done()

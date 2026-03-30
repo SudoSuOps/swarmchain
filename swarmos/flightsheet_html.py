@@ -314,9 +314,9 @@ def render_html(
   <h2>DELIVERABLES</h2>
   <table>
     <tr><th>File</th><th>Contents</th><th>Fields</th></tr>
-    <tr><td class="ok">royal_jelly.jsonl</td><td>Full pairs scoring &ge; 0.75</td><td>messages + swarmchain_deed (all fields)</td></tr>
+    <tr><td class="ok">royal-jelly.jsonl</td><td>Full pairs scoring &ge; 0.75</td><td>messages + swarmchain_deed (all fields)</td></tr>
     <tr><td class="warn">honey.jsonl</td><td>Full pairs scoring 0.50 - 0.74</td><td>messages + swarmchain_deed (all fields)</td></tr>
-    <tr><td>wax.jsonl</td><td>Full pairs scoring &lt; 0.50</td><td>messages + swarmchain_deed (all fields)</td></tr>
+    <tr><td>propolis.jsonl</td><td>Full pairs scoring &lt; 0.50</td><td>messages + swarmchain_deed (all fields)</td></tr>
     <tr><td class="value">receipts.jsonl</td><td>Master record — every verdict</td><td>All deed fields (no messages)</td></tr>
     <tr><td class="value">merkle_proof.json</td><td>SHA256 Merkle tree</td><td>Root hash + leaf count + protocol</td></tr>
     <tr><td class="value">closing.json</td><td>Closing statement</td><td>Actuals vs estimates + variance + manifest</td></tr>

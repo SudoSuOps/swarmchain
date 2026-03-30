@@ -113,7 +113,7 @@ async def _api_req(client: httpx.AsyncClient, method: str, path: str, **kwargs):
 
 
 def _parse_verdict(text: str):
-    """Parse judge output. Score-only classification. 3-tier: royal-jelly / honey / wax."""
+    """Parse judge output. Score-only classification. 3-tier: royal-jelly / honey / propolis."""
     score, verdict = 0.0, "FAIL"
     for line in text.split("\n"):
         ll = line.strip().lower()
@@ -168,7 +168,7 @@ async def _judge_worker(worker_id, port, input_q, bin_file, write_lock, stats, c
                 f.write(json.dumps(entry) + "\n")
             stats["judged"] += 1
             if c == "honey": stats["honey"] += 1
-            elif c == "jelly": stats["jelly"] += 1
+            elif c == "royal-jelly": stats["royal_jelly"] += 1
             else: stats["propolis"] += 1
         input_q.task_done()
 
@@ -178,7 +178,7 @@ async def run_judge_phase(
     bin_file: Path, start_idx: int = 0,
 ) -> dict:
     """Run all judges, dump verdicts to bin. Returns stats."""
-    stats = {"judged": 0, "honey": 0, "jelly": 0, "propolis": 0, "skipped": 0}
+    stats = {"judged": 0, "honey": 0, "royal_jelly": 0, "propolis": 0, "skipped": 0}
     input_q = asyncio.Queue(maxsize=100)
     write_lock = asyncio.Lock()
     start_time = time.monotonic()
@@ -256,7 +256,7 @@ async def _record_worker(worker_id, port, work_q, output_dir, write_lock, stats,
                 f.write(json.dumps({**pair, "swarmchain_validation": result}) + "\n")
             stats["recorded"] += 1
             if c == "honey": stats["r_honey"] += 1
-            elif c == "jelly": stats["r_jelly"] += 1
+            elif c == "royal-jelly": stats["r_royal_jelly"] += 1
             else: stats["r_propolis"] += 1
         work_q.task_done()
 
@@ -266,7 +266,7 @@ async def run_record_phase(
     existing_receipts: int = 0,
 ) -> dict:
     """Run Recorder recorders, polling the bin. Returns stats."""
-    stats = {"recorded": 0, "r_honey": 0, "r_jelly": 0, "r_propolis": 0}
+    stats = {"recorded": 0, "r_honey": 0, "r_royal_jelly": 0, "r_propolis": 0}
     work_q = asyncio.Queue(maxsize=len(recorder_ports) * 2)
     write_lock = asyncio.Lock()
     start_time = time.monotonic()
@@ -420,14 +420,14 @@ def run_epoch(job_id: str, resume: bool = False):
     progress.judged = judge_stats["judged"] + existing_judged
     progress.recorded = record_stats["recorded"] + existing_receipts
     progress.honey = judge_stats["honey"]
-    progress.jelly = judge_stats["jelly"]
+    progress.royal_jelly = judge_stats["royal_jelly"]
     progress.propolis = judge_stats["propolis"]
     progress.judge_rate = judge_stats["rate"]
     progress.recorder_rate = record_stats["rate"]
     progress.elapsed_sec = judge_stats["wall_sec"] + record_stats["wall_sec"]
     state.save_progress(job_id, progress)
 
-    log.info("═══ EPOCH COMPLETE — %d deeds | H:%d J:%d P:%d ═══",
-             progress.recorded, progress.honey, progress.jelly, progress.propolis)
+    log.info("═══ EPOCH COMPLETE — %d deeds | H:%d RJ:%d P:%d ═══",
+             progress.recorded, progress.honey, progress.royal_jelly, progress.propolis)
 
     return progress

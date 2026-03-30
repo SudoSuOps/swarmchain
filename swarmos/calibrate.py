@@ -53,7 +53,7 @@ async def _call_model(client: httpx.AsyncClient, port: int, system: str, user: s
 
 
 def _parse_verdict(text: str):
-    """Parse judge output. Score-only classification. 3-tier: royal-jelly / honey / wax."""
+    """Parse judge output. Score-only classification. 3-tier: royal-jelly / honey / propolis."""
     score, verdict = 0.0, "FAIL"
     for line in text.split("\n"):
         ll = line.strip().lower()
@@ -82,7 +82,7 @@ async def _run_calibration(
     """Run calibration sample and collect measurements."""
     judge_latencies = []
     recorder_latencies = []
-    royal_jelly = honey = wax = 0
+    royal_jelly = honey = propolis = 0
 
     async with httpx.AsyncClient() as client:
         for pair in pairs:
@@ -108,14 +108,13 @@ async def _run_calibration(
 
             if cls == "royal-jelly": royal_jelly += 1
             elif cls == "honey": honey += 1
-            else: wax += 1
             else: propolis += 1
 
-    total = honey + jelly + propolis
+    total = royal_jelly + honey + propolis
     return {
         "judge_latencies": judge_latencies,
         "recorder_latencies": recorder_latencies,
-        "royal_jelly": royal_jelly, "honey": honey, "propolis": wax,
+        "royal_jelly": royal_jelly, "honey": honey, "propolis": propolis,
         "total": total,
         "royal_jelly_rate": royal_jelly / max(total, 1),
     }
@@ -218,8 +217,8 @@ def run_calibration(
         gpu_power_mean_w=power_after,
         cpu_load_mean=0,  # Would need /proc/loadavg
         sample_honey_rate=results["royal_jelly_rate"],
-        sample_honey=results["royal_jelly"],
-        sample_jelly=results["honey"],
+        sample_royal_jelly=results["royal_jelly"],
+        sample_honey=results["honey"],
         sample_propolis=results["propolis"],
         warnings=warnings,
     )
@@ -242,9 +241,9 @@ def format_calibration(report: CalibrationReport) -> str:
         f"  Recorder:  {report.measured_recorder_hashrate:.1f} deeds/min",
         "",
         "QUALITY (sample):",
-        f"  Royal Jelly: {report.sample_honey} ({report.sample_honey_rate:.1%})",
-        f"  Honey:       {report.sample_jelly}",
-        f"  Wax:         {report.sample_propolis}",
+        f"  Royal Jelly: {report.sample_royal_jelly} ({report.sample_honey_rate:.1%})",
+        f"  Honey:       {report.sample_honey}",
+        f"  Propolis:    {report.sample_propolis}",
         "",
         "GPU POWER:",
     ]
