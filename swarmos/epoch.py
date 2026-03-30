@@ -397,8 +397,30 @@ def run_epoch(job_id: str, resume: bool = False):
         if ca.role == "recorder":
             recorder_ports.extend(ca.ports)
 
-    log.info("EPOCH START: %s | %d pairs | %d judges | %d recorders",
-             domain, len(pairs), len(judge_ports), len(recorder_ports))
+    # Health check — only use ports that respond
+    import urllib.request
+    def _healthy(port):
+        try:
+            urllib.request.urlopen(f"http://localhost:{port}/health", timeout=3)
+            return True
+        except Exception:
+            return False
+
+    all_judge = judge_ports[:]
+    all_recorder = recorder_ports[:]
+    judge_ports = [p for p in judge_ports if _healthy(p)]
+    recorder_ports = [p for p in recorder_ports if _healthy(p)]
+    dead_j = len(all_judge) - len(judge_ports)
+    dead_r = len(all_recorder) - len(recorder_ports)
+    if dead_j: log.warning("DEAD JUDGES: %d/%d ports unresponsive — excluded", dead_j, len(all_judge))
+    if dead_r: log.warning("DEAD RECORDERS: %d/%d ports unresponsive — excluded", dead_r, len(all_recorder))
+    if not judge_ports:
+        raise ValueError("No healthy judge servers. Launch llama-servers before cooking.")
+    if not recorder_ports:
+        raise ValueError("No healthy recorder servers. Launch llama-servers before cooking.")
+
+    log.info("EPOCH START: %s | %d pairs | %d judges (%d dead) | %d recorders (%d dead)",
+             domain, len(pairs), len(judge_ports), dead_j, len(recorder_ports), dead_r)
 
     # Save initial progress
     progress = EpochProgress(job_id=job_id, domain=domain, pair_count=poj.pair_count)
