@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWARMCHAIN — GLASS WALL</title>
+    <style>
+        :root { --gold: #D4A843; --green: #2EA98F; --red: #E8603C; --bg: #0D1117; --panel: #161B22; --border: #21262D; --text: #C9D1D9; --dim: #484F58; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); color: var(--text); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+        .header h1 { font-size: 14px; letter-spacing: 4px; color: var(--gold); font-weight: 400; }
+        .header .tag { font-size: 10px; padding: 2px 8px; border: 1px solid var(--green); color: var(--green); border-radius: 3px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+        .card-title { font-size: 10px; letter-spacing: 2px; color: var(--dim); margin-bottom: 12px; }
+        .big-num { font-size: 36px; color: var(--gold); font-weight: 300; }
+        .big-num.green { color: var(--green); }
+        .stat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--dim); }
+        .stat-value { font-variant-numeric: tabular-nums; }
+        .tier-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+        .tier-rj { background: var(--gold); }
+        .tier-h { background: var(--green); }
+        .tier-p { background: var(--red); }
+        .pipeline { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+        .pipeline .step { background: var(--border); padding: 6px 12px; border-radius: 4px; }
+        .pipeline .step.active { border: 1px solid var(--green); color: var(--green); }
+        .pipeline .arrow { color: var(--dim); }
+        .model-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .model-card:last-child { border-bottom: none; }
+        .model-name { font-size: 13px; }
+        .model-role { font-size: 10px; padding: 2px 6px; border-radius: 3px; }
+        .role-judge { background: var(--gold); color: var(--bg); }
+        .role-recorder { background: var(--green); color: var(--bg); }
+        .footer { text-align: center; font-size: 10px; color: var(--dim); padding-top: 24px; border-top: 1px solid var(--border); letter-spacing: 2px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { text-align: left; font-size: 10px; letter-spacing: 1px; color: var(--dim); padding: 8px 0; border-bottom: 1px solid var(--border); font-weight: 400; }
+        td { padding: 8px 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+        .gold { color: var(--gold); }
+        .green { color: var(--green); }
+        .red { color: var(--red); }
+        .dim { color: var(--dim); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>SWARMCHAIN &mdash; GLASS WALL</h1>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <span class="tag" id="status">CONNECTING</span>
+            <span style="font-size:11px;color:var(--dim)" id="clock"></span>
+        </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div style="margin-bottom:24px;">
+        <div class="pipeline">
+            <div class="step">RAW PAIRS</div>
+            <div class="arrow">&rarr;</div>
+            <div class="step active">JUDGE &middot; Gemma-3 12B &middot; GPU</div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">CLASSIFY</div>
+            <div class="arrow">&rarr;</div>
+            <div class="step active">RECORD &middot; Gemma-2 2B &middot; CPU</div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">TITLED DEED</div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">HEDERA ANCHOR</div>
+        </div>
+    </div>
+
+    <!-- TOP STATS -->
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">TOTAL DEEDS SEALED</div>
+            <div class="big-num" id="total-deeds">117,026</div>
+        </div>
+        <div class="card">
+            <div class="card-title">COST TO MINT</div>
+            <div class="big-num green">$0.0008</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:4px;">per deed &middot; 98.5% margin</div>
+        </div>
+        <div class="card">
+            <div class="card-title">DOMAINS VALIDATED</div>
+            <div class="big-num">2</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:4px;">grants &middot; finance</div>
+        </div>
+    </div>
+
+    <!-- CLASSIFICATION + MODELS -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">CLASSIFICATION BREAKDOWN</div>
+            <div class="tier-bar">
+                <div class="tier-rj" id="bar-rj" style="width:70%"></div>
+                <div class="tier-h" id="bar-h" style="width:10%"></div>
+                <div class="tier-p" id="bar-p" style="width:20%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:16px;">
+                <span class="gold">ROYAL JELLY &ge; 0.75</span>
+                <span class="green">HONEY &ge; 0.50</span>
+                <span class="red">PROPOLIS &lt; 0.50</span>
+            </div>
+            <table>
+                <tr><th>TIER</th><th>GRANTS</th><th>FINANCE</th><th>TOTAL</th></tr>
+                <tr><td class="gold">Royal Jelly</td><td>70,394</td><td>4,072</td><td>74,466</td></tr>
+                <tr><td class="green">Honey</td><td>1,621</td><td>13,044</td><td>14,665</td></tr>
+                <tr><td class="red">Propolis</td><td>16,811</td><td>584</td><td>17,395</td></tr>
+                <tr><td class="dim">Total</td><td>88,826</td><td>17,700</td><td>106,526</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-title">VALIDATION CHAIN</div>
+            <div class="model-card">
+                <div>
+                    <div class="model-name">Gemma-3 12B IT</div>
+                    <div style="font-size:10px;color:var(--dim);">Q4_K_M &middot; 8.0 GB VRAM</div>
+                </div>
+                <span class="model-role role-judge">JUDGE</span>
+            </div>
+            <div class="model-card">
+                <div>
+                    <div class="model-name">Gemma-2 2B IT</div>
+                    <div style="font-size:10px;color:var(--dim);">Q4_K_M &middot; 1.6 GB &middot; CPU/Edge</div>
+                </div>
+                <span class="model-role role-recorder">RECORDER</span>
+            </div>
+            <div style="margin-top:16px;">
+                <div class="card-title">HARDWARE</div>
+                <div class="stat-row"><span class="stat-label">GPU 0</span><span>RTX PRO 4500 &middot; 32 GB &middot; Judge</span></div>
+                <div class="stat-row"><span class="stat-label">GPU 1</span><span>RTX PRO 6000 &middot; 96 GB &middot; Judge</span></div>
+                <div class="stat-row"><span class="stat-label">CPU</span><span>Xeon w9-3475X &middot; 72T &middot; Recorder</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EPOCHS -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-title">COMPLETED EPOCHS</div>
+        <table>
+            <tr><th>JOB</th><th>DOMAIN</th><th>INPUT</th><th>ROYAL JELLY</th><th>HONEY</th><th>PROPOLIS</th><th>DEEDS</th><th>MARGIN</th><th>STATUS</th></tr>
+            <tr>
+                <td class="dim">328878703ca74bf8</td>
+                <td>grants</td>
+                <td>43,691</td>
+                <td class="gold">70,394</td>
+                <td class="green">1,621</td>
+                <td class="red">16,811</td>
+                <td>77,591</td>
+                <td class="green">98.5%</td>
+                <td class="green">CLOSED</td>
+            </tr>
+            <tr>
+                <td class="dim">a692b99a35604ba2</td>
+                <td>finance</td>
+                <td>14,366</td>
+                <td class="gold">4,072</td>
+                <td class="green">13,044</td>
+                <td class="red">584</td>
+                <td>17,700</td>
+                <td class="green">99.5%</td>
+                <td class="green">CLOSED</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- DOMAINS READY -->
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-title">DOMAIN QUEUE</div>
+        <table>
+            <tr><th>DOMAIN</th><th>ALGO</th><th>RAW PAIRS</th><th>STATUS</th></tr>
+            <tr><td>cre</td><td>validate-cre</td><td>45,039</td><td class="gold">READY</td></tr>
+            <tr><td>failure</td><td>validate-failure</td><td>5,278</td><td class="gold">READY</td></tr>
+            <tr><td>medical</td><td>validate-medical</td><td>&mdash;</td><td class="dim">QUEUED</td></tr>
+            <tr><td>aviation</td><td>validate-aviation</td><td>&mdash;</td><td class="dim">QUEUED</td></tr>
+            <tr><td>legal</td><td>validate-legal</td><td>&mdash;</td><td class="dim">QUEUED</td></tr>
+        </table>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        DEFENDABLE AI INTELLIGENCE REFINERY &mdash; SWARM &amp; BEE &mdash; BASE MODELS ONLY &mdash; SOPHISTICATION IS SIMPLICITY
+    </div>
+
+</div>
+<script>
+setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toISOString().slice(0,19) + 'Z';
+}, 1000);
+document.getElementById('status').textContent = 'OPERATIONAL';
+document.getElementById('clock').textContent = new Date().toISOString().slice(0,19) + 'Z';
+</script>
+</body>
+</html>

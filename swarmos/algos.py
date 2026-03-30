@@ -15,16 +15,16 @@ class AlgoConfig:
     name: str
     domain: str
     description: str
-    judge_model: str = "9B-Q4"          # Base 9B — does the thinking
-    recorder_model: str = "2B-Q4"       # Base 2B — writes the deed (no fine-tune needed)
+    judge_model: str = "gemma3-12B-Q4"   # Gemma-3 12B — GPUs judge
+    recorder_model: str = "gemma2-2B-Q4" # Gemma-2 2B — CPUs record
     judge_gguf: str = ""                # Override GGUF path
     recorder_gguf: str = ""             # Override GGUF path
     judge_system_prompt: str = ""
     recorder_system_prompt: str = ""
     judge_max_tokens: int = 4096
     recorder_max_tokens: int = 512
-    honey_threshold: float = 0.80
-    jelly_threshold: float = 0.40
+    royal_jelly_threshold: float = 0.75
+    honey_threshold: float = 0.50
     judge_temperature: float = 0.1
 
     def __post_init__(self):
@@ -64,7 +64,7 @@ for _domain in [
     register(AlgoConfig(
         name=f"validate-{_domain}",
         domain=_domain,
-        description=f"Validate {_domain} domain pairs (9B base judge → 2B base recorder)",
+        description=f"Validate {_domain} domain pairs (Gemma-3 12B judge → Gemma-2 2B recorder)",
     ))
 
 # ARC benchmark algo (different scoring)

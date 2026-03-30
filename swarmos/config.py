@@ -60,27 +60,28 @@ CPU_SYSTEM_PRICE = float(_env("CPU_SYSTEM_PRICE", "8000.0"))   # Xeon + mobo + R
 # ── Model Specs (VRAM per instance) ───────────────────────
 
 MODEL_VRAM_GB = {
-    "9B-Q4": 6.2,
-    "4B-Q4": 3.5,
-    "27B-Q4": 16.0,
-    "1.5B-Q4": 1.5,
+    "gemma3-12B-Q4": 8.0,    # Gemma-3 12B — judge
+    "gemma2-2B-Q4": 1.6,     # Gemma-2 2B — recorder
+    "9B-Q4": 6.2,             # Qwen3.5-9B (legacy)
+    "2B-Q4": 1.5,             # Qwen3.5-2B (legacy)
 }
 
-# ── Benchmark Defaults (measured from Epoch 2) ────────────
+# ── Benchmark Defaults ────────────────────────────────────
 
-# Verdicts per minute per instance (GPU) — 9B base judge
+# Verdicts per minute per instance (GPU)
 BENCHMARK_JUDGE_RATE = {
-    "9B-Q4": 7.2,      # ~86/min ÷ 12 instances
+    "gemma3-12B-Q4": 5.5,    # Gemma-3 12B — deeper reasoning, slightly slower
+    "9B-Q4": 7.2,             # Qwen3.5-9B (legacy)
 }
 
-# Deeds per minute per instance — 2B base recorder
+# Deeds per minute per instance — recorder
 BENCHMARK_RECORDER_RATE_GPU = {
-    "2B-Q4": 60.0,     # ~0.3s/deed on GPU with /no_think
-    "9B-Q4": 21.0,     # Legacy (Legacy-9B) — do not use in production
+    "gemma2-2B-Q4": 65.0,    # Gemma-2 2B — fast, clean deeds
+    "2B-Q4": 60.0,            # Qwen3.5-2B (legacy)
 }
 BENCHMARK_RECORDER_RATE_CPU = {
-    "2B-Q4": 5.0,      # ~12s/deed on Xeon AMX with /no_think
-    "9B-Q4": 1.7,      # Legacy (Legacy-9B) — do not use in production
+    "gemma2-2B-Q4": 5.5,     # Gemma-2 2B on Xeon AMX
+    "2B-Q4": 5.0,             # Qwen3.5-2B (legacy)
 }
 
 # CPU threads per instance for recording
@@ -98,8 +99,8 @@ RECORDER_CPU_PORT_START = int(_env("RECORDER_CPU_PORT_START", "9001"))
 # No fine-tuned models. No custom builds. No compromised weights.
 # Base models are unbiased, auditable, and reproducible.
 #
-# The judge thinks (9B base). The recorder writes (2B base).
-# You don't hire a lawyer to fill out the deed at the courthouse.
+# The judge thinks (Gemma-3 12B). The recorder writes (Gemma-2 2B).
+# GPUs judge. CPUs record. You don't hire a lawyer to fill out the deed.
 #
 
 # ── System Prompts ─────────────────────────────────────────
@@ -134,5 +135,5 @@ RECORD_STATUS: SEALED"""
 
 # ── Default GGUFs — BASE MODELS ONLY ──────────────────────
 
-DEFAULT_JUDGE_GGUF = str(MODELS_DIR / "Qwen3.5-9B-Q4_K_M.gguf")
-DEFAULT_RECORDER_GGUF = str(MODELS_DIR / "Qwen3.5-2B-Q4_K_M.gguf")
+DEFAULT_JUDGE_GGUF = str(MODELS_DIR / "gemma-3-12b-it-Q4_K_M.gguf")
+DEFAULT_RECORDER_GGUF = str(MODELS_DIR / "gemma-2-2b-it-Q4_K_M.gguf")

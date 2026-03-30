@@ -3,28 +3,46 @@
 **Policy: BASE MODELS ONLY in the validation chain.**
 
 No fine-tuned models. No custom builds. No compromised weights.
-Base models are unbiased, auditable, and reproducible.
+The judge thinks. The recorder writes. Separation of concerns.
 
-## Active Models
+## Validation Chain (Active)
 
-| Role | Model | Quant | VRAM | Location |
-|------|-------|-------|------|----------|
-| **Judge** | Qwen3.5-9B | Q4_K_M | 6.2 GB | `/data2/models/Qwen3.5-9B-Q4_K_M.gguf` |
-| **Recorder** | Qwen3.5-2B | Q4_K_M | 1.5 GB | `/data2/models/Qwen3.5-2B-Q4_K_M.gguf` |
-| **Inspector** | Qwen3.5-0.8B | Q4_K_M | 0.8 GB | `/data2/models/Qwen3.5-0.8B-Q4_K_M.gguf` |
+| Role | Model | Quant | VRAM | Hardware | Path |
+|------|-------|-------|------|----------|------|
+| **Judge** | Gemma-3 12B IT | Q4_K_M | 8.0 GB | **GPUs** | `gemma-3-12b-it-Q4_K_M.gguf` |
+| **Recorder** | Gemma-2 2B IT | Q4_K_M | 1.6 GB | **CPUs / Edge** | `gemma-2-2b-it-Q4_K_M.gguf` |
 
-## Available (not in validation chain)
+## Hardware Assignment
 
-| Model | Quant | VRAM | Location |
-|-------|-------|------|----------|
-| Gemma-3-12B-IT | Q4_K_M | ~8 GB | `/data2/models/gemma-3-12b-it-Q4_K_M.gguf` |
-| Gemma-2-2B-IT | Q4_K_M | ~1.5 GB | `/data2/models/gemma-2-2b-it-Q4_K_M.gguf` |
-| Qwen2.5-7B-Instruct | Q4_K_M | ~5 GB | `/data2/models/Qwen2.5-7B-Instruct-Q4_K_M.gguf` |
+```
+GPUs     → Judge (Gemma-3 12B)   — deep reasoning, quality verdicts
+CPUs     → Recorder (Gemma-2 2B) — fast deed writing, /no_think
+Edge     → Recorder (Gemma-2 2B) — distributed recording at the edge
+```
 
-## Why Base Models
+## Classification Tiers
 
-The judge thinks (9B base). The recorder writes (2B base).
-You don't hire a lawyer to fill out the deed at the courthouse.
+```
+royal-jelly   >= 0.75   The king. Production-grade training data.
+honey         >= 0.50   Usable. Improvement candidate.
+propolis      <  0.50   Low quality. Rejected from training.
+```
 
-Fine-tuned models introduce bias into the validation chain.
-The refinery must be neutral ground — the pairs are what get trained, not the judges.
+## Why These Models
+
+**Gemma-3 12B** — Google's best open-weight reasoning model at the 12B scale.
+Deeper than 9B Qwen, better at nuanced quality assessment. Fits on RTX PRO 4500 (32GB).
+Two instances on RTX PRO 6000 (96GB) with room to spare.
+
+**Gemma-2 2B** — Smallest model that writes clean, structured output.
+Recording a deed doesn't require intelligence — it requires format compliance.
+Runs on CPU with AMX acceleration. Runs on edge devices. Runs everywhere.
+
+## Available (on disk, not in chain)
+
+| Model | Quant | Path |
+|-------|-------|------|
+| Qwen3.5-9B | Q4_K_M | `Qwen3.5-9B-Q4_K_M.gguf` (legacy judge) |
+| Qwen3.5-2B | Q4_K_M | `Qwen3.5-2B-Q4_K_M.gguf` (legacy recorder) |
+| Qwen3.5-0.8B | Q4_K_M | `Qwen3.5-0.8B-Q4_K_M.gguf` (inspector) |
+| Qwen2.5-7B | Q4_K_M | `Qwen2.5-7B-Instruct-Q4_K_M.gguf` |
