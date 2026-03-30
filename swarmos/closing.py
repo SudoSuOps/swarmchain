@@ -54,7 +54,8 @@ def _file_size(path: Path) -> int:
 
 def _build_manifest(output_dir: Path) -> list[DeliverableFile]:
     files = []
-    for name in ["honey.jsonl", "jelly.jsonl", "propolis.jsonl", "receipts.jsonl",
+    for name in ["honey.jsonl", "jelly.jsonl", "royal-jelly.jsonl",
+                  "propolis.jsonl", "wax.jsonl", "receipts.jsonl",
                   "judged.jsonl", "epoch_report.json", "closing.json"]:
         p = output_dir / name
         if p.exists():
@@ -90,8 +91,8 @@ def _adopt_epoch(domain: str, output_dir: Path) -> EpochProgress:
     judged_count = _count_lines(output_dir / "judged.jsonl")
     receipt_count = _count_lines(output_dir / "receipts.jsonl")
     honey = _count_lines(output_dir / "honey.jsonl")
-    jelly = _count_lines(output_dir / "jelly.jsonl")
-    propolis = _count_lines(output_dir / "propolis.jsonl")
+    jelly = _count_lines(output_dir / "jelly.jsonl") + _count_lines(output_dir / "royal-jelly.jsonl")
+    propolis = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")
 
     return EpochProgress(
         job_id="adopted",
@@ -237,9 +238,10 @@ def generate_closing(job_id: str) -> ClosingStatement:
         epoch_source = "adopted"
 
     # ── Observed: classification counts from files ──
+    # Support both naming conventions: jelly/propolis AND royal-jelly/wax
     honey_count = _count_lines(output_dir / "honey.jsonl")
-    jelly_count = _count_lines(output_dir / "jelly.jsonl")
-    propolis_count = _count_lines(output_dir / "propolis.jsonl")
+    jelly_count = _count_lines(output_dir / "jelly.jsonl") + _count_lines(output_dir / "royal-jelly.jsonl")
+    propolis_count = _count_lines(output_dir / "propolis.jsonl") + _count_lines(output_dir / "wax.jsonl")
     receipt_count = _count_lines(output_dir / "receipts.jsonl")
     total_processed = honey_count + jelly_count + propolis_count
     actual_honey_rate = honey_count / max(total_processed, 1)
