@@ -1,0 +1,36 @@
+<div style="font-family: 'Courier New', monospace; background: #0a0a0a; color: #e0e0e0; padding: 40px; max-width: 700px; margin: 0 auto;">
+  <div style="border-bottom: 1px solid #222; padding-bottom: 16px; margin-bottom: 24px;">
+    <span style="color: #f0b000; font-size: 14px; letter-spacing: 4px;">SWARMCHAIN</span>
+    <span style="color: #555; font-size: 14px; letter-spacing: 4px;"> PRE-FLIGHT SHEET</span>
+  </div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:24px;">
+    <tr><td style="color:#555;padding:6px 0;">Job</td><td style="color:#f0b000;">${JOB_ID}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Domain</td><td>${DOMAIN}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Algo</td><td>validate-${DOMAIN}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Pairs</td><td style="color:#f0b000;">${PAIR_COUNT}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Input</td><td style="font-size:11px;">${INPUT_FILE}</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Lock Hash</td><td style="font-size:11px;color:#555;">${LOCK_HASH}...</td></tr>
+    <tr><td style="color:#555;padding:6px 0;">Status</td><td style="color:#4caf50;">LOCKED</td></tr>
+  </table>
+  <div style="color:#f0b000; font-size:11px; letter-spacing:2px; margin-bottom:12px;">JUDGES &mdash; GPU</div>
+  ${JUDGE_TABLE}
+  <div style="color:#4caf50; font-size:11px; letter-spacing:2px; margin:16px 0 12px;">RECORDERS &mdash; CPU + EDGE</div>
+  ${RECORDER_TABLE}
+  <div style="background:#111; border:1px solid #222; border-radius:8px; padding:16px; margin:20px 0; font-size:11px;">
+    <table style="width:100%; border-collapse:collapse;">
+      <tr><td style="color:#555;padding:4px 0;">Models</td><td style="text-align:right;">${TOTAL_MODELS}</td></tr>
+      <tr><td style="color:#555;padding:4px 0;">VRAM</td><td style="text-align:right;">${TOTAL_VRAM} GB</td></tr>
+      <tr><td style="color:#555;padding:4px 0;">Power</td><td style="text-align:right;">${TOTAL_POWER}W</td></tr>
+      <tr><td style="color:#555;padding:4px 0;">Wall Time</td><td style="text-align:right;">~${WALL_HOURS} hours</td></tr>
+      <tr><td style="color:#555;padding:4px 0;">CTM</td><td style="text-align:right;color:#4caf50;">$${CTM}/deed</td></tr>
+      <tr><td style="color:#555;padding:4px 0;">Cooks</td><td style="text-align:right;">2 (discovery + validation)</td></tr>
+    </table>
+  </div>
+  <div style="text-align:center; margin: 32px 0;">
+    <a href="${APPROVE_URL}" style="display:inline-block; padding:18px 60px; background:transparent; border:2px solid #f0b000; color:#f0b000; font-family:'Courier New',monospace; font-size:18px; letter-spacing:4px; text-decoration:none; border-radius:6px;">APPROVE</a>
+    <div style="color:#555; font-size:10px; margin-top:12px; letter-spacing:1px;">Issues permit, generates POJ, authorizes cook.</div>
+  </div>
+  <div style="border-top:1px solid #222; padding-top:16px; text-align:center; color:#555; font-size:10px; letter-spacing:2px;">
+    DEFENDABLE AI INTELLIGENCE REFINERY &mdash; <span style="color:#f0b000;">SWARM &amp; BEE</span>
+  </div>
+</div>
