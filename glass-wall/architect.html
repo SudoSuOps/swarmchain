@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWARMARCHITECT — Flight Sheet Designer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+:root { --gold: #f0b000; --amber: #d4940a; --dark: #0a0a0a; --panel: #111; --border: #222; --text: #e0e0e0; --dim: #555; --green: #4caf50; --red: #f04040; --blue: #4fc3f7; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--dark); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+.container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 32px; }
+.header h1 { font-family: 'Space Mono', monospace; color: var(--gold); font-size: 14px; letter-spacing: 4px; }
+.header .tag { font-size: 10px; color: var(--dim); letter-spacing: 2px; }
+
+/* PROMPT */
+.prompt-section { margin-bottom: 32px; }
+.prompt-label { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; }
+.prompt-box { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; resize: vertical; min-height: 100px; outline: none; }
+.prompt-box:focus { border-color: var(--gold); }
+.prompt-box::placeholder { color: #333; }
+.advisor { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 12px; font-size: 13px; color: var(--dim); line-height: 1.6; display: none; }
+.advisor.active { display: block; border-color: var(--gold); }
+.advisor .bee { color: var(--gold); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group label { font-size: 10px; letter-spacing: 1px; color: var(--dim); margin-bottom: 6px; text-transform: uppercase; }
+.form-group input, .form-group select { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; }
+.form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+.form-group select option { background: var(--dark); }
+.form-full { grid-column: 1 / -1; }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 14px 32px; background: transparent; border: 2px solid var(--gold); color: var(--gold); font-family: 'Space Mono', monospace; font-size: 13px; letter-spacing: 3px; cursor: pointer; border-radius: 6px; transition: all 0.3s; }
+.btn:hover { background: var(--gold); color: var(--dark); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-row { display: flex; gap: 12px; margin-top: 24px; }
+.btn-secondary { border-color: var(--border); color: var(--dim); }
+.btn-secondary:hover { border-color: var(--dim); color: var(--text); background: transparent; }
+.btn-green { border-color: var(--green); color: var(--green); }
+.btn-green:hover { background: var(--green); color: var(--dark); }
+
+/* RESULT */
+.result { margin-top: 32px; display: none; }
+.result.active { display: block; }
+.result-header { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--gold); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.summary-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.summary-card .num { font-family: 'Space Mono', monospace; font-size: 24px; color: var(--gold); }
+.summary-card .label { font-size: 10px; color: var(--dim); letter-spacing: 1px; margin-top: 4px; }
+.detail-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+.detail-table td { padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+.detail-table td:first-child { color: var(--dim); }
+.detail-table td:last-child { text-align: right; font-family: 'Space Mono', monospace; }
+.fee-total { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--gold); text-align: center; margin: 16px 0; }
+.section-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; margin: 20px 0 10px; }
+.section-label.gold { color: var(--gold); }
+.section-label.green { color: var(--green); }
+
+/* FOOTER */
+.footer { text-align: center; font-size: 10px; color: var(--dim); letter-spacing: 2px; font-family: 'Space Mono', monospace; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>SWARMARCHITECT</h1>
+    <div class="tag">INTERNAL &mdash; FLIGHT SHEET DESIGNER</div>
+  </div>
+
+  <!-- PROMPT -->
+  <div class="prompt-section">
+    <div class="prompt-label">DESCRIBE THE COOK</div>
+    <textarea class="prompt-box" id="prompt" placeholder="Example: I have 15,000 SBIR Phase II proposals that need validation. Budget justifications and technical narratives. Mix of NSF and DOE."></textarea>
+    <div class="advisor" id="advisor">
+      <div class="bee">SWARMGRANT ADVISOR</div>
+      <div id="advisor-text"></div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Domain</label>
+      <select id="domain">
+        <option value="">Select domain</option>
+        <option value="grants">Grants / SBIR / Federal</option>
+        <option value="finance">Finance / Capital</option>
+        <option value="aviation">Aviation / ASRS</option>
+        <option value="medical">Medical / Clinical</option>
+        <option value="legal">Legal / Compliance</option>
+        <option value="cre">Commercial Real Estate</option>
+        <option value="signal">Signal / Intelligence</option>
+        <option value="marketing">Marketing</option>
+        <option value="failure">Failure Intelligence</option>
+        <option value="curator">Curator</option>
+        <option value="router">Router</option>
+        <option value="junior">Junior / Education</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Pair Count</label>
+      <input type="number" id="pairs" placeholder="e.g. 15000">
+    </div>
+    <div class="form-group form-full">
+      <label>Input File Path</label>
+      <input type="text" id="input-path" placeholder="/data1/swarm-honey/grants/swarmgrant_honey.jsonl">
+    </div>
+    <div class="form-group">
+      <label>Royal Jelly Threshold</label>
+      <select id="rj-threshold">
+        <option value="0.75">0.75 (discovery — wide gate)</option>
+        <option value="0.80">0.80</option>
+        <option value="0.85">0.85</option>
+        <option value="0.86" selected>0.86 (standard — validated)</option>
+        <option value="0.90">0.90 (strict)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Fee Tier</label>
+      <select id="fee-tier">
+        <option value="floor">Floor — $0.005/deed (volume)</option>
+        <option value="standard">Standard — $0.01/deed</option>
+        <option value="full" selected>Full Title — $0.025/deed</option>
+        <option value="enterprise">Enterprise — $0.05/deed</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Client Name</label>
+      <input type="text" id="client" value="Swarm & Bee">
+    </div>
+    <div class="form-group">
+      <label>Cooks</label>
+      <select id="cooks">
+        <option value="2" selected>2 — Discovery + Validation (standard)</option>
+        <option value="1">1 — Discovery only</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" id="generate-btn" onclick="generateFlightSheet()">GENERATE FLIGHT SHEET</button>
+    <button class="btn btn-secondary" onclick="detectHardware()">DETECT HARDWARE</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result">
+    <div class="result-header">FLIGHT SHEET — <span id="r-algo"></span></div>
+
+    <div class="summary-grid">
+      <div class="summary-card"><div class="num" id="r-pairs">—</div><div class="label">PAIRS</div></div>
+      <div class="summary-card"><div class="num" id="r-models">—</div><div class="label">MODELS</div></div>
+      <div class="summary-card"><div class="num" id="r-wall">—</div><div class="label">HOURS</div></div>
+    </div>
+
+    <div class="section-label gold">JUDGES — GPU</div>
+    <table class="detail-table" id="r-judges"></table>
+
+    <div class="section-label green">RECORDERS — CPU + EDGE</div>
+    <table class="detail-table" id="r-recorders"></table>
+
+    <div class="section-label gold">ESTIMATES</div>
+    <table class="detail-table" id="r-estimates"></table>
+
+    <div class="section-label gold">FEE SCHEDULE</div>
+    <table class="detail-table" id="r-fees"></table>
+    <div class="fee-total" id="r-total">—</div>
+
+    <div class="btn-row" style="justify-content: center;">
+      <button class="btn btn-green" id="approve-btn" onclick="approveInternal()">APPROVE INTERNAL</button>
+      <button class="btn" onclick="sendToClient()">SEND TO CLIENT</button>
+    </div>
+  </div>
+
+  <div class="footer">DEFENDABLE AI INTELLIGENCE REFINERY &mdash; SWARM &amp; BEE</div>
+</div>
+
+<script>
+const API = '/api';
+const FEE_RATES = { floor: 0.005, standard: 0.01, full: 0.025, enterprise: 0.05 };
+const FIXED_FEES = { model_prep: 250, doc_prep: 75, flight_sheet: 150, recording: 50, inspection: 75 };
+const FIXED_TOTAL = Object.values(FIXED_FEES).reduce((a, b) => a + b, 0);
+
+// Hardware state (populated by detect or defaults)
+let hardware = {
+  judges: [
+    { name: 'RTX PRO 4500', vram: 32, instances: 3, rate: 16.5, power: 120 },
+    { name: 'RTX PRO 6000', vram: 96, instances: 8, rate: 44.0, power: 240 },
+    { name: 'RTX 3090 Ti (whale)', vram: 24, instances: 2, rate: 11.0, power: 264 },
+  ],
+  recorders: [
+    { name: 'Xeon w9-3475X (72T AMX)', instances: 5, rate: 27.5 },
+    { name: 'Jetson Orin Nano (sigedge)', instances: 1, rate: 6.7 },
+  ],
+};
+
+function detectHardware() {
+  fetch(API + '/cook-status').then(r => r.json()).then(d => {
+    document.querySelector('.btn-secondary').textContent = 'HARDWARE DETECTED';
+    document.querySelector('.btn-secondary').style.borderColor = 'var(--green)';
+    document.querySelector('.btn-secondary').style.color = 'var(--green)';
+  }).catch(() => {
+    document.querySelector('.btn-secondary').textContent = 'USING DEFAULTS';
+  });
+}
+
+function generateFlightSheet() {
+  const domain = document.getElementById('domain').value;
+  const pairs = parseInt(document.getElementById('pairs').value) || 0;
+  const inputPath = document.getElementById('input-path').value;
+  const rjThreshold = parseFloat(document.getElementById('rj-threshold').value);
+  const feeTier = document.getElementById('fee-tier').value;
+  const client = document.getElementById('client').value;
+  const cooks = parseInt(document.getElementById('cooks').value);
+
+  if (!domain || !pairs) { alert('Select domain and enter pair count'); return; }
+
+  // Calculate
+  const judgeRate = hardware.judges.reduce((s, j) => s + j.rate, 0);
+  const recorderRate = hardware.recorders.reduce((s, r) => s + r.rate, 0);
+  const bottleneck = Math.min(judgeRate, recorderRate);
+  const wallHours = (pairs / (bottleneck * 60)).toFixed(1);
+  const totalModels = hardware.judges.reduce((s, j) => s + j.instances, 0) + hardware.recorders.reduce((s, r) => s + r.instances, 0);
+  const totalPower = hardware.judges.reduce((s, j) => s + j.power, 0) + 25; // +25 for edge
+  const ctm = (totalPower / 1000 * 0.10 * wallHours / pairs + 0.00001).toFixed(5); // rough CTM
+
+  const premiumRate = FEE_RATES[feeTier];
+  const titlePremium = pairs * premiumRate;
+  const totalClosing = titlePremium + FIXED_TOTAL;
+
+  // Render
+  document.getElementById('r-algo').textContent = `validate-${domain}`;
+  document.getElementById('r-pairs').textContent = pairs.toLocaleString();
+  document.getElementById('r-models').textContent = totalModels;
+  document.getElementById('r-wall').textContent = cooks === 2 ? `${wallHours} x2` : wallHours;
+
+  // Judges table
+  document.getElementById('r-judges').innerHTML = hardware.judges.map(j =>
+    `<tr><td>${j.name}</td><td>Gemma-3 12B Q4 x${j.instances}</td><td style="color:var(--gold)">${j.rate} v/min</td></tr>`
+  ).join('') + `<tr><td style="color:var(--gold)">TOTAL</td><td></td><td style="color:var(--gold)">${judgeRate} v/min</td></tr>`;
+
+  // Recorders table
+  document.getElementById('r-recorders').innerHTML = hardware.recorders.map(r =>
+    `<tr><td>${r.name}</td><td>Gemma-2 2B Q4 x${r.instances}</td><td style="color:var(--green)">${r.rate} d/min</td></tr>`
+  ).join('') + `<tr><td style="color:var(--green)">TOTAL</td><td></td><td style="color:var(--green)">${recorderRate} d/min</td></tr>`;
+
+  // Estimates
+  document.getElementById('r-estimates').innerHTML = `
+    <tr><td>Bottleneck</td><td>${bottleneck} d/min (${judgeRate > recorderRate ? 'recorder' : 'judge'})</td></tr>
+    <tr><td>Wall time per cook</td><td>~${wallHours} hours</td></tr>
+    <tr><td>Power</td><td>${totalPower}W</td></tr>
+    <tr><td>RJ threshold</td><td>${rjThreshold}</td></tr>
+    <tr><td>Cooks</td><td>${cooks} (${cooks === 2 ? 'discovery + validation' : 'discovery only'})</td></tr>
+    <tr><td>Judge</td><td style="color:var(--gold)">Gemma-3 12B Q4 — GPU</td></tr>
+    <tr><td>Recorder</td><td style="color:var(--green)">Gemma-2 2B Q4 — CPU/Edge</td></tr>
+  `;
+
+  // Fees
+  document.getElementById('r-fees').innerHTML = `
+    <tr><td>Title premium</td><td>${pairs.toLocaleString()} x $${premiumRate.toFixed(3)} = $${titlePremium.toFixed(2)}</td></tr>
+    <tr><td>Model prep</td><td>$${FIXED_FEES.model_prep}</td></tr>
+    <tr><td>Doc prep</td><td>$${FIXED_FEES.doc_prep}</td></tr>
+    <tr><td>Flight sheet</td><td>$${FIXED_FEES.flight_sheet}</td></tr>
+    <tr><td>Recording</td><td>$${FIXED_FEES.recording}</td></tr>
+    <tr><td>Inspection</td><td>$${FIXED_FEES.inspection}</td></tr>
+  `;
+  document.getElementById('r-total').textContent = `$${totalClosing.toFixed(2)}`;
+
+  document.getElementById('result').classList.add('active');
+
+  // Store for approve/send
+  window._flightSheet = { domain, pairs, inputPath, rjThreshold, feeTier, client, cooks, wallHours, totalClosing, totalModels, judgeRate, recorderRate };
+}
+
+function approveInternal() {
+  const fs = window._flightSheet;
+  if (!fs) return;
+  fetch(`/api/architect/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fs),
+  }).then(r => r.json()).then(d => {
+    if (d.job_id) {
+      document.getElementById('approve-btn').textContent = 'APPROVED — ' + d.job_id;
+      document.getElementById('approve-btn').style.borderColor = 'var(--green)';
+      document.getElementById('approve-btn').disabled = true;
+    }
+  }).catch(e => alert('Approve failed: ' + e.message));
+}
+
+function sendToClient() {
+  const fs = window._flightSheet;
+  if (!fs) return;
+  const email = prompt('Client email:', 'build@swarmandbee.ai');
+  if (!email) return;
+  fetch(`/api/architect/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...fs, to: email }),
+  }).then(r => r.json()).then(d => {
+    alert('Flight sheet sent to ' + email);
+  }).catch(e => alert('Send failed: ' + e.message));
+}
+
+// Auto-detect domain from prompt
+document.getElementById('prompt').addEventListener('input', function() {
+  const text = this.value.toLowerCase();
+  const sel = document.getElementById('domain');
+  if (text.includes('sbir') || text.includes('grant') || text.includes('nsf') || text.includes('nofo')) sel.value = 'grants';
+  else if (text.includes('aviation') || text.includes('asrs') || text.includes('faa')) sel.value = 'aviation';
+  else if (text.includes('medical') || text.includes('clinical') || text.includes('patient')) sel.value = 'medical';
+  else if (text.includes('legal') || text.includes('compliance') || text.includes('contract')) sel.value = 'legal';
+  else if (text.includes('finance') || text.includes('credit') || text.includes('loan')) sel.value = 'finance';
+  else if (text.includes('real estate') || text.includes('cre') || text.includes('cap rate')) sel.value = 'cre';
+
+  // Extract pair count from prompt
+  const nums = text.match(/(\d{1,3}(?:,\d{3})*|\d+)\s*(?:pairs|pair|proposals|records|documents|files)/);
+  if (nums) document.getElementById('pairs').value = nums[1].replace(/,/g, '');
+});
+</script>
+</body>
+</html>

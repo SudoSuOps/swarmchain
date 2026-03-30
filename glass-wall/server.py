@@ -89,6 +89,73 @@ def _cook_status():
     }
 
 
+def _architect_approve(body):
+    """Create a job from the architect UI — flight sheet + permit + POJ + sign."""
+    import subprocess
+    domain = body.get("domain", "")
+    pairs = body.get("pairs", 0)
+    input_path = body.get("inputPath", "")
+    client = body.get("client", "Swarm & Bee")
+    fee_tier = body.get("feeTier", "full")
+
+    if not domain or not pairs:
+        return {"error": "domain and pairs required"}
+
+    env = os.environ.copy()
+    env["PATH"] = "/home/swarm/.local/bin:" + env.get("PATH", "")
+
+    # Generate flight sheet via swarmos CLI
+    args = ["swarmos", "flightsheet", domain, "--pairs", str(pairs), "--lock"]
+    if input_path:
+        args.extend(["--input", input_path])
+    result = subprocess.run(args, env=env, capture_output=True, text=True, timeout=30)
+
+    # Extract job ID from output
+    job_id = None
+    for line in result.stdout.split("\n"):
+        if "Job ID:" in line:
+            job_id = line.split("Job ID:")[1].strip()
+
+    if not job_id:
+        return {"error": "flight sheet generation failed", "output": result.stdout[-200:]}
+
+    # Permit + POJ + sign
+    subprocess.run(["swarmos", "permit", "issue", job_id], env=env, capture_output=True, timeout=10)
+    subprocess.run(["swarmos", "poj", "generate", job_id, "--client", client, "--tier", fee_tier], env=env, capture_output=True, timeout=10)
+    subprocess.run(["swarmos", "poj", "sign", job_id], env=env, capture_output=True, timeout=10)
+
+    return {"job_id": job_id, "domain": domain, "pairs": pairs, "status": "approved"}
+
+
+def _architect_send(body):
+    """Send preflight email to client from architect UI."""
+    import subprocess, hashlib
+    domain = body.get("domain", "")
+    pairs = body.get("pairs", 0)
+    to = body.get("to", "build@swarmandbee.ai")
+
+    # Use Resend CLI with preflight template
+    env = os.environ.copy()
+    env["PATH"] = "/home/swarm/.resend/bin:/home/swarm/.local/bin:" + env.get("PATH", "")
+    env["RESEND_API_KEY"] = RESEND_KEY
+    env["DOMAIN"] = domain
+    env["PAIR_COUNT"] = str(pairs)
+    env["JOB_ID"] = body.get("job_id", "pending")
+    env["INPUT_FILE"] = body.get("inputPath", "")
+    env["LOCK_HASH"] = "pending"
+    env["APPROVE_URL"] = "http://192.168.0.91:3000/architect"
+
+    template_dir = Path(__file__).parent.parent / "templates"
+    result = subprocess.run(
+        ["bash", str(template_dir / "send.sh"), "preflight",
+         f"PRE-FLIGHT — validate-{domain} — {pairs:,} pairs"],
+        env={**env, "SWARM_TO": to},
+        capture_output=True, text=True, timeout=30,
+    )
+
+    return {"sent": True, "to": to, "output": result.stdout[:200]}
+
+
 def _approve_job(job_id, token):
     """Record approval, issue permit, generate POJ, sign. Returns (ok, message)."""
     job_dir = JOBS_DIR / job_id
@@ -251,6 +318,36 @@ class GlassWallHandler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
+    def do_POST(self):
+        path = self.path.split('?')[0]
+        length = int(self.headers.get('Content-Length', 0))
+        body = json.loads(self.rfile.read(length)) if length > 0 else {}
+
+        # ── Architect: approve (create job internally) ──
+        if path == '/api/architect/approve':
+            result = _architect_approve(body)
+            data = json.dumps(result).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        # ── Architect: send preflight to client ──
+        if path == '/api/architect/send':
+            result = _architect_send(body)
+            data = json.dumps(result).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        self.send_response(404)
+        self.end_headers()
 
     def do_HEAD(self):
         self.send_response(200)
