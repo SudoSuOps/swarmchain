@@ -243,63 +243,65 @@ function addFeed(who, what, color) {
   feedCount++; document.getElementById('feed-count').textContent = feedCount;
 }
 
-// ── POLL ──
+// ── POLL — reads live cook files via /api/cook-status ──
+let lastJudged = 0;
 async function poll() {
   try {
-    const r = await fetch(`${API}/blocks?limit=10`);
-    if (!r.ok) throw new Error('backend offline');
-    const data = await r.json();
-    const blocks = data.blocks || [];
-    const block = blocks[0];
-    if (!block) { setCooking(false); return; }
+    const r = await fetch('/api/cook-status');
+    if (!r.ok) throw new Error('server offline');
+    const d = await r.json();
 
-    document.getElementById('h-block').textContent = block.block_id?.slice(0,12) || '—';
-    setCooking(block.status === 'open');
+    const on = d.cooking;
+    setCooking(on);
+    document.getElementById('h-deeds').textContent = d.judged?.toLocaleString() || '—';
+    document.getElementById('h-block').textContent = d.job_id?.slice(0,12) || '—';
 
-    // Attempts
-    const ar = await fetch(`${API}/attempts/block/${block.block_id}`);
-    const ad = await ar.json();
-    const attempts = ad.attempts || (Array.isArray(ad)?ad:[]);
-
-    // Stats
-    let nrj=0, nh=0, np=0, best=0;
-    attempts.forEach(a => { const s=a.score||0; if(s>=0.75)nrj++; else if(s>=0.50)nh++; else np++; if(s>best)best=s; });
-    const tot = Math.max(nrj+nh+np,1);
-    document.getElementById('bar-rj').style.width = (nrj/tot*100)+'%';
-    document.getElementById('bar-h').style.width = (nh/tot*100)+'%';
-    document.getElementById('bar-p').style.width = (np/tot*100)+'%';
-    document.getElementById('n-rj').textContent = nrj+' rj'; document.getElementById('n-h').textContent = nh+' h'; document.getElementById('n-p').textContent = np+' p';
+    // Tier bars
+    const tot = Math.max(d.royal_jelly+d.honey+d.propolis, 1);
+    document.getElementById('bar-rj').style.width = (d.royal_jelly/tot*100)+'%';
+    document.getElementById('bar-h').style.width = (d.honey/tot*100)+'%';
+    document.getElementById('bar-p').style.width = (d.propolis/tot*100)+'%';
+    document.getElementById('n-rj').textContent = d.royal_jelly+' rj';
+    document.getElementById('n-h').textContent = d.honey+' h';
+    document.getElementById('n-p').textContent = d.propolis+' p';
 
     // Finality
-    document.getElementById('fin-score').textContent = best > 0 ? best.toFixed(3) : '—';
-    document.getElementById('fin-score').style.color = best >= 0.75 ? 'var(--gold)' : best >= 0.50 ? 'var(--amber)' : 'var(--dim)';
-    document.getElementById('fin-status').textContent = block.status === 'solved' ? 'SEALED' : block.status === 'open' ? 'MINING...' : block.status;
+    document.getElementById('fin-score').textContent = d.avg_score > 0 ? d.avg_score.toFixed(3) : '—';
+    document.getElementById('fin-score').style.color = d.avg_score >= 0.75 ? 'var(--gold)' : d.avg_score >= 0.50 ? 'var(--amber)' : 'var(--dim)';
+    document.getElementById('fin-status').textContent = on ? `${d.progress_pct}% — ${d.rj_rate}% royal jelly` : d.status === 'complete' ? 'EPOCH COMPLETE' : 'awaiting cook';
 
-    // Bees
-    const bg = bees.filter(b=>!b.real);
-    const newReal = attempts.slice(-20).map((a,i) => {
-      const angle = (i/20)*Math.PI*2, r = 40+(1-(a.score||0))*100;
-      return new Bee(canvas.width/2+Math.cos(angle)*r, canvas.height/2+Math.sin(angle)*r, a.score||0, a.node_id||'?', true);
-    });
-    bees = [...bg, ...newReal];
+    // Stats
+    document.getElementById('s-domain').textContent = d.domain || '—';
+    document.getElementById('s-judged').textContent = d.judged?.toLocaleString() || '—';
+    document.getElementById('s-recorded').textContent = d.receipts?.toLocaleString() || '—';
+    document.getElementById('s-rj').textContent = d.royal_jelly?.toLocaleString() || '—';
+    document.getElementById('s-honey').textContent = d.honey?.toLocaleString() || '—';
+    document.getElementById('s-prop').textContent = d.propolis?.toLocaleString() || '—';
+    if (d.pair_count) document.getElementById('s-hashrate').textContent = `${d.judged}/${d.pair_count}`;
 
-    // Dashboard
-    try {
-      const dr = await fetch(`${API}/dashboard`); const dash = await dr.json();
-      const all = dash.all_time||{}, today = dash.today||{};
-      document.getElementById('h-deeds').textContent = (all.blocks_total||0).toLocaleString();
-      document.getElementById('s-judged').textContent = (today.attempts_total||0).toLocaleString();
-      document.getElementById('s-recorded').textContent = (today.blocks_solved||0).toLocaleString();
-      document.getElementById('s-rj').textContent = nrj.toLocaleString();
-      document.getElementById('s-honey').textContent = nh.toLocaleString();
-      document.getElementById('s-prop').textContent = np.toLocaleString();
-    } catch(e) {}
+    // Live feed — add new verdicts
+    if (d.recent && d.judged > lastJudged) {
+      d.recent.forEach(v => {
+        const c = v.classification === 'royal-jelly' ? '#f0b000' : v.classification === 'honey' ? '#d4940a' : '#f04040';
+        addFeed(v.classification, `${v.score.toFixed(2)} · ${v.judge_ms}ms`, c);
+      });
+      lastJudged = d.judged;
+    }
 
-    // History
-    document.getElementById('block-history').innerHTML = blocks.slice(0,5).map(b => {
-      const c = b.status==='solved'?'var(--green)':b.status==='open'?'var(--gold)':'var(--red)';
-      return `<div class="stat-row"><span style="color:${c}">${b.block_id?.slice(0,8)}</span><span>${b.status}</span></div>`;
-    }).join('');
+    // Spawn real bees from recent verdicts
+    if (d.recent && on) {
+      const bg = bees.filter(b => !b.real);
+      const newReal = d.recent.map((v, i) => {
+        const angle = (i / 10) * Math.PI * 2;
+        const radius = 40 + (1 - v.score) * 100;
+        return new Bee(
+          canvas.width/2 + Math.cos(angle) * radius,
+          canvas.height/2 + Math.sin(angle) * radius,
+          v.score, v.classification, true
+        );
+      });
+      bees = [...bg, ...newReal];
+    }
 
     document.getElementById('poll-status').textContent = `poll #${pollNum} · ${new Date().toISOString().slice(11,19)}`;
     pollNum++;
