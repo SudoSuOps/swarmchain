@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+
+# Environment — NEVER commit secrets
+.env
+*.env.local
+*.env.prod
+
+# pytest / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+.nuxt/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+
+# Docker
+pgdata/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Alembic compiled
+alembic/versions/*.pyc
+
+# Logs
+*.log
+logs/
+
+# Data (pair datasets are too large for git)
+data/*.jsonl
+data/*.db
+*.gguf
+
+# Job artifacts (generated at runtime)
+jobs/
+
+# Temp
+*.bak
+*.tmp
+*.orig
