@@ -8,7 +8,7 @@
 set -euo pipefail
 
 export PATH="$HOME/.resend/bin:$HOME/.local/bin:$PATH"
-export RESEND_API_KEY="${RESEND_API_KEY:-re_2hEw15wp_6uhiqCTwDFF4E5X4VocBB19c}"
+export RESEND_API_KEY="${RESEND_API_KEY:?RESEND_API_KEY must be set — key rotated 2026-05-29 after a leak}"
 
 JOB_NAME="$1"
 TOTAL_STEPS="$2"
