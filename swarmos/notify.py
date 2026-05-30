@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 import resend
 
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "***SECRET_PURGED_FROM_HISTORY***")
+RESEND_API_KEY = os.environ["RESEND_API_KEY"]  # rotated + moved to env 2026-05-29 (was hardcoded)
 FROM_EMAIL = "SwarmOS <build@swarmandbee.ai>"
 TO_EMAIL = os.environ.get("SWARM_NOTIFY_EMAIL", "build@swarmandbee.ai")
 

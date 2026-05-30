@@ -15,7 +15,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get("SWARM_GLASSWALL_PORT", "3000"))
 JOBS_DIR = Path(os.environ.get("SWARM_JOBS_DIR", "/data2/swarmchain/jobs"))
 HONEY_DIR = Path(os.environ.get("HONEY_DIR", "/data1/swarm-honey"))
-RESEND_KEY = os.environ.get("RESEND_API_KEY", "***SECRET_PURGED_FROM_HISTORY***")
+RESEND_KEY = os.environ["RESEND_API_KEY"]  # rotated + moved to env 2026-05-29 (was hardcoded)
 
 
 def _cook_status():

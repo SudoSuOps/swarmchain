@@ -69,3 +69,5 @@ jobs/
 *.bak
 *.tmp
 *.orig
+__pycache__/
+*.pyc
